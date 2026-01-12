@@ -24,6 +24,7 @@ export interface MarketingEvent {
   date: string;
   type: 'religious' | 'national' | 'commercial' | 'global' | 'custom';
   description: { ar: string; en: string };
+  priority: 'high' | 'medium' | 'low';
 }
 
 export interface GeneratedContent {

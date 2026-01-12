@@ -52,7 +52,13 @@ export const translations = {
     status: "الحالة",
     createdAt: "تاريخ الانضمام",
     filterByField: "تصفية حسب المجال",
-    searchStore: "البحث عن متجر..."
+    searchStore: "البحث عن متجر...",
+    adminLogin: "دخول الإدارة",
+    username: "اسم المستخدم",
+    password: "كلمة المرور",
+    login: "تسجيل الدخول",
+    loginError: "بيانات الدخول غير صحيحة",
+    adminAccessRequired: "مطلوب صلاحيات مسؤول للوصول"
   },
   en: {
     appName: "Smart Reminder",
@@ -106,6 +112,12 @@ export const translations = {
     status: "Status",
     createdAt: "Join Date",
     filterByField: "Filter by Field",
-    searchStore: "Search store..."
+    searchStore: "Search store...",
+    adminLogin: "Admin Login",
+    username: "Username",
+    password: "Password",
+    login: "Login",
+    loginError: "Invalid credentials",
+    adminAccessRequired: "Admin privileges required"
   }
 };

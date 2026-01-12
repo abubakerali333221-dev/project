@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Camera, Save, Check } from 'lucide-react';
+import { Save, Check, Globe } from 'lucide-react';
 import { BUSINESS_TYPES, SOCIAL_PLATFORMS } from '../constants';
 
 const Profile: React.FC = () => {
   const { t, profile, updateProfile, lang } = useApp();
-  const [success, setSuccess] = React.useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,15 +20,16 @@ const Profile: React.FC = () => {
         <div className="h-32 gradient-bg"></div>
         <div className="px-8 pb-8">
           <div className="relative -mt-12 mb-8 inline-block">
-            <img 
-              src={profile.logo || `https://picsum.photos/seed/${profile.storeName || 'store'}/200`} 
-              className="w-24 h-24 rounded-3xl border-4 border-white dark:border-gray-800 object-cover bg-white" 
-              alt="Logo"
-            />
-            <label className="absolute -bottom-2 -right-2 p-2 bg-indigo-600 text-white rounded-xl cursor-pointer hover:scale-110 transition-transform shadow-lg">
-              <Camera size={18} />
-              <input type="file" className="hidden" />
-            </label>
+            <div className="relative w-24 h-24 rounded-3xl border-4 border-white dark:border-gray-800 bg-white overflow-hidden shadow-lg flex items-center justify-center">
+              <img 
+                src={profile.logo || `https://picsum.photos/seed/${profile.storeName || 'store'}/200`} 
+                className="w-full h-full object-cover" 
+                alt="Logo"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200?text=Logo';
+                }}
+              />
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -56,6 +57,21 @@ const Profile: React.FC = () => {
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold block">{lang === 'ar' ? 'رابط الشعار (URL)' : 'Logo URL'}</label>
+              <div className="relative">
+                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input 
+                  type="text"
+                  value={profile.logo || ''}
+                  onChange={(e) => updateProfile({ logo: e.target.value })}
+                  placeholder="https://example.com/logo.png"
+                  className="w-full bg-slate-50 dark:bg-gray-900 border-0 rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 px-2">{lang === 'ar' ? 'أدخل رابط الصورة مباشرة ليظهر كشعار لمتجرك.' : 'Enter a direct image link to use as your store logo.'}</p>
             </div>
 
             <div className="space-y-4">

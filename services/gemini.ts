@@ -1,7 +1,8 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 
-const API_KEY = process.env.API_KEY || "";
+// Fix: Obtaining API key exclusively from process.env.API_KEY
+// Fix: Use 'gemini-3-flash-preview' for general text tasks and 'gemini-2.5-flash-image' for images.
 
 export const generateMarketingCopy = async (params: {
   storeName: string;
@@ -10,7 +11,8 @@ export const generateMarketingCopy = async (params: {
   tone: string;
   lang: 'ar' | 'en';
 }) => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Fix: Create instance right before API call to ensure it uses the latest key
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `Write a professional marketing caption for social media.
   Store Name: ${params.storeName}
   Business Category: ${params.businessType}
@@ -24,11 +26,12 @@ export const generateMarketingCopy = async (params: {
     contents: prompt,
   });
 
+  // Fix: Directly accessing .text property (not a method)
   return response.text;
 };
 
 export const generateMarketingImage = async (prompt: string) => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
     contents: {
@@ -42,6 +45,7 @@ export const generateMarketingImage = async (prompt: string) => {
   });
 
   let imageUrl = '';
+  // Fix: Iterate through all parts to find the image inlineData
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) {
       imageUrl = `data:image/png;base64,${part.inlineData.data}`;
@@ -52,8 +56,16 @@ export const generateMarketingImage = async (prompt: string) => {
 };
 
 export const generateMarketingVideo = async (prompt: string) => {
-  // Ensure the user has selected their key if needed (standard for Veo)
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Fix: Mandatory API key selection check for Veo models
+  // @ts-ignore - Assuming window.aistudio is available in the environment
+  if (!(await window.aistudio.hasSelectedApiKey())) {
+    // @ts-ignore
+    await window.aistudio.openSelectKey();
+    // Guideline: Proceed immediately after triggering openSelectKey()
+  }
+
+  // Fix: Always re-instantiate GoogleGenAI to pick up the updated key from selected dialog
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   let operation = await ai.models.generateVideos({
     model: 'veo-3.1-fast-generate-preview',
@@ -66,13 +78,14 @@ export const generateMarketingVideo = async (prompt: string) => {
   });
 
   while (!operation.done) {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
     operation = await ai.operations.getVideosOperation({ operation: operation });
   }
 
   const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
   if (downloadLink) {
-    const response = await fetch(`${downloadLink}&key=${API_KEY}`);
+    // Fix: Appending API key for MP4 bytes retrieval
+    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     const blob = await response.blob();
     return URL.createObjectURL(blob);
   }

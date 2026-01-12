@@ -9,11 +9,12 @@ import {
   Settings, 
   LogOut, 
   Menu, 
-  X, 
   Sun, 
   Moon,
   Globe,
-  ShieldCheck
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -26,6 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
   const { t, lang, setLang, isDarkMode, setIsDarkMode, profile } = useApp();
   const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
+  // تم إزالة 'founder' من المصفوفة الأساسية
   const menuItems = [
     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
     { id: 'calendar', label: t.calendar, icon: CalendarIcon },
@@ -34,13 +36,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'profile', label: t.profile, icon: Settings },
   ];
 
-  const adminItems = [
-    { id: 'founder', label: t.founderDashboard, icon: ShieldCheck },
-  ];
+  const handleLogout = () => {
+    alert(lang === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully');
+    setActiveTab('dashboard');
+  };
 
   return (
     <div className={`min-h-screen flex ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-slate-50 text-slate-900'}`}>
-      {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -48,7 +50,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 ${lang === 'ar' ? 'right-0' : 'left-0'} 
         w-64 z-50 transition-transform duration-300 transform 
@@ -57,16 +58,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
       `}>
         <div className="h-full flex flex-col">
           <div className="p-6 flex items-center gap-3">
-            <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-bold text-xl">
+            <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
               S
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              {t.appName}
-            </h1>
+            <div>
+              <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {t.appName}
+              </h1>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">Smart Assistant</span>
+            </div>
           </div>
 
           <nav className="flex-1 px-4 py-4 space-y-2">
-            <div className="text-xs font-bold text-slate-400 px-4 py-2 uppercase tracking-widest">{lang === 'ar' ? 'الرئيسية' : 'Main'}</div>
+            <div className="text-xs font-bold text-slate-400 px-4 py-2 uppercase tracking-widest">
+              {lang === 'ar' ? 'القائمة الرئيسية' : 'Main Menu'}
+            </div>
+            
             {menuItems.map((item) => (
               <button
                 key={item.id}
@@ -75,29 +82,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   setSidebarOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                   ${activeTab === item.id 
-                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' 
-                    : 'hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500'}
-                `}
-              >
-                <item.icon size={20} />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            ))}
-
-            <div className="mt-8 text-xs font-bold text-slate-400 px-4 py-2 uppercase tracking-widest">{lang === 'ar' ? 'الإدارة' : 'Admin'}</div>
-            {adminItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setSidebarOpen(false);
-                }}
-                className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                  ${activeTab === item.id 
-                    ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' 
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold' 
                     : 'hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500'}
                 `}
               >
@@ -107,11 +94,31 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
             ))}
           </nav>
 
-          <div className="p-4 border-t dark:border-gray-700">
-            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-gray-700 rounded-xl">
+          {/* زر الإدارة المخصص في أسفل القائمة */}
+          <div className="px-4 py-4 space-y-4">
+            <button
+              onClick={() => {
+                setActiveTab('founder');
+                setSidebarOpen(false);
+              }}
+              className={`
+                w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all border-2
+                ${activeTab === 'founder' 
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-lg' 
+                  : 'bg-slate-50 dark:bg-gray-700/50 border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-white'}
+              `}
+            >
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={20} className={activeTab === 'founder' ? 'text-amber-400' : 'text-slate-400'} />
+                <span className="font-bold text-sm">{t.founderDashboard}</span>
+              </div>
+              {lang === 'ar' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </button>
+
+            <div className="p-3 bg-slate-50 dark:bg-gray-700 rounded-xl flex items-center gap-3">
               <img 
                 src={profile.logo || `https://picsum.photos/seed/${profile.storeName || 'store'}/100`} 
-                className="w-10 h-10 rounded-full object-cover" 
+                className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-600" 
                 alt="Logo"
               />
               <div className="overflow-hidden">
@@ -123,7 +130,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <header className="h-16 bg-white dark:bg-gray-800 border-b dark:border-gray-700 flex items-center justify-between px-6 shrink-0">
           <button 
@@ -153,13 +159,16 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <button className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-red-500">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-red-500"
+            >
               <LogOut size={20} />
             </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50/50 dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto h-full">
             {children}
           </div>

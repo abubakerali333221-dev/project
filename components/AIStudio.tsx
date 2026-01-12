@@ -1,16 +1,27 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, Image as ImageIcon, Video, Type, Download, Share2, AlertCircle, Loader2 } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Video, Type, Download, Share2, Loader2 } from 'lucide-react';
 import { generateMarketingCopy, generateMarketingImage, generateMarketingVideo } from '../services/gemini';
 
-const AIStudio: React.FC = () => {
+interface AIStudioProps {
+  initialEventId?: string;
+  onResetPreselection?: () => void;
+}
+
+const AIStudio: React.FC<AIStudioProps> = ({ initialEventId, onResetPreselection }) => {
   const { t, lang, profile, events, addContent } = useApp();
   const [activeTab, setActiveTab] = useState<'image' | 'video' | 'copy'>('image');
   const [loading, setLoading] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(events[0].id);
+  const [selectedEvent, setSelectedEvent] = useState(initialEventId || events[0]?.id);
   const [tone, setTone] = useState('tonePersuasive');
   const [result, setResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialEventId) {
+      setSelectedEvent(initialEventId);
+    }
+  }, [initialEventId]);
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -73,13 +84,15 @@ const AIStudio: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Controls */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border dark:border-gray-700 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border dark:border-gray-700 shadow-sm space-y-6 h-fit">
           <div className="space-y-2">
             <label className="text-sm font-bold block">{t.selectEvent}</label>
             <select 
               value={selectedEvent}
-              onChange={(e) => setSelectedEvent(e.target.value)}
+              onChange={(e) => {
+                setSelectedEvent(e.target.value);
+                if (onResetPreselection) onResetPreselection();
+              }}
               className="w-full bg-slate-50 dark:bg-gray-700 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500"
             >
               {events.map(ev => (
@@ -111,11 +124,10 @@ const AIStudio: React.FC = () => {
             className="w-full py-4 gradient-bg text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 hover:scale-[1.02] transition-transform"
           >
             {loading ? <Loader2 className="animate-spin" /> : <Sparkles size={20} />}
-            {loading ? t.generating : t.quickActions}
+            {loading ? t.generating : (lang === 'ar' ? 'بدء التحليل والإنشاء' : 'Start AI Generation')}
           </button>
         </div>
 
-        {/* Output */}
         <div className="md:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-3xl border dark:border-gray-700 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
           {loading ? (
             <div className="text-center space-y-4">
@@ -133,7 +145,10 @@ const AIStudio: React.FC = () => {
                 {activeTab === 'copy' && <div className="p-8 whitespace-pre-wrap text-lg leading-relaxed">{result}</div>}
               </div>
               <div className="flex gap-4">
-                <button className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors">
+                <button 
+                  onClick={() => window.open(result, '_blank')}
+                  className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors"
+                >
                   <Download size={20} />
                   {t.download}
                 </button>
@@ -147,7 +162,11 @@ const AIStudio: React.FC = () => {
               <div className="w-16 h-16 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto text-slate-400">
                 <Sparkles size={32} />
               </div>
-              <p className="text-slate-500 dark:text-gray-400 font-medium">ابدأ الآن واختر ما ترغب في إنشائه للمناسبة القادمة!</p>
+              <p className="text-slate-500 dark:text-gray-400 font-medium">
+                {initialEventId 
+                  ? (lang === 'ar' ? `تم اختيار المناسبة بنجاح، اضغط على زر "بدء الإنشاء" للحصول على المحتوى.` : `Event selected! Click "Start Generation" to get your content.`)
+                  : (lang === 'ar' ? 'ابدأ الآن واختر ما ترغب في إنشائه للمناسبة القادمة!' : 'Start now and select what you want to create for the next occasion!')}
+              </p>
             </div>
           )}
         </div>
